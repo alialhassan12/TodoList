@@ -28,6 +28,8 @@ const initialTodos=[
 export default function TodoList(){
     const [todos,setTodos]=useState(initialTodos);
     const [titleInput,setTitleInput]=useState("");
+    const[filter,setFilter]=useState("all");
+
     function handleCheck(todoId){
         const updatedTodo= todos.map(todo=>{
             if(todo.id == todoId){
@@ -37,10 +39,21 @@ export default function TodoList(){
         });
         setTodos(updatedTodo);
     }
-    const showTodos=todos.map((todo)=>{
+    const filterTodos=()=>{
+        if(filter == "all"){
+            return todos;
+        }else if(filter == "done"){
+            return todos.filter(f=>f.isCompleted==true);
+        }else if(filter == "progress"){
+            return todos.filter(f=>f.isCompleted==false);
+        }
+    }
+
+    const showTodos=filterTodos().map((todo)=>{
         console.log(`id:${todo.title} isCompleted: ${todo.isCompleted}`);
         return <Todo key={todo.id} todo={todo} handleCheck={handleCheck}></Todo>
     });
+
     function handleAddClick(){
         if(titleInput == ""){
             alert("title cant be empty");
@@ -55,6 +68,7 @@ export default function TodoList(){
         setTodos([...todos,newTodo]);
         setTitleInput("");
     }
+    
     return (
         <Container maxWidth="sm" >
             <Card sx={{ minWidth: 275 }}>
@@ -66,6 +80,9 @@ export default function TodoList(){
 
                     {/* Filter buttons group */}
                     <ToggleButtonGroup
+                        onChange={(e,filterValue)=>{
+                            setFilter(filterValue);
+                        }}
                         style={{marginTop:"30px"}}
                         exclusive
                         aria-label="text alignment"
