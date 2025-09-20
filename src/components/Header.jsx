@@ -1,5 +1,6 @@
 import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
+import Divider from '@mui/material/Divider';
 import { useState } from 'react';
 import { useTheme } from '@mui/material/styles';
 
@@ -29,10 +30,10 @@ export default function Header(){
     return (
         <>
         <h1>To-Do</h1>
-        <hr />
+        <Divider/>
         <ToggleButtonGroup 
-            aria-label="status" 
             color="primary"
+            aria-label="status" 
             exclusive
             onChange={(e,newAlignment)=>{
                 setAlignment(newAlignment);

@@ -1,25 +1,32 @@
 import Container from '@mui/material/Container';
-import Header from './header';
-import Footer from './Footer';
+import Header from './components/Header';
+import Footer from './components/Footer';
+import TodoList from './components/TodoList';
 import './App.css'
 import { createTheme,ThemeProvider } from '@mui/material/styles';
-import { lime, purple } from '@mui/material/colors';
+
 
 const theme=createTheme({
-  palette:{
-    primary:{main:lime[500]},
-    secondary:{main:purple[500]}
+  typografy:{
+    fontFamily:["funnelDisplay"]
   }
 });
+
 function App() {
   
   return (
     <>
     <ThemeProvider theme={theme}>
+      <TodoList></TodoList>
+    </ThemeProvider>
+
+    {/* <ThemeProvider theme={theme}>
       <Container maxWidth="sm" 
         style={{display:'flex',
                 flexDirection:"column",
-                width:'100%',
+                justifyContent:"center",
+                alignItems:"center",
+                background:"#888",
                 gap:"10px",
                 padding:"10px",
                 borderRadius:"6px",
@@ -28,7 +35,7 @@ function App() {
         <Header/>
         <Footer/>
       </Container>
-    </ThemeProvider>
+    </ThemeProvider> */}
     </>
   )
 }
