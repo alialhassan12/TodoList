@@ -12,33 +12,23 @@ import TextField from '@mui/material/TextField';
 
 //components
 import Todo from './Todo';
+import { TodosContext } from '../contexts/TodosContext';
 //hooks
-import { useState } from 'react';
+import { useState,useContext,useEffect } from 'react';
 //others
 import { v4 as uuidv4 } from 'uuid';
 
-const initialTodos=[
-    {id:uuidv4(),title:"first",details:"this year",isCompleted:false},
-    {id:uuidv4(),title:"second",details:"this month",isCompleted:false},
-    {id:uuidv4(),title:"third",details:"today",isCompleted:false},
-    {id:uuidv4(),title:"fourth",details:"in 2 years",isCompleted:false},
-];
-
 
 export default function TodoList(){
-    const [todos,setTodos]=useState(initialTodos);
+    const {todos,setTodos}=useContext(TodosContext);
     const [titleInput,setTitleInput]=useState("");
     const[filter,setFilter]=useState("all");
-
-    function handleCheck(todoId){
-        const updatedTodo= todos.map(todo=>{
-            if(todo.id == todoId){
-                todo.isCompleted =!todo.isCompleted;
-            }
-            return todo;
-        });
-        setTodos(updatedTodo);
-    }
+    
+    useEffect(()=>{
+        const storageTodos=JSON.parse(localStorage.getItem("todos"));
+        setTodos(storageTodos);
+    },[]);
+    
     const filterTodos=()=>{
         if(filter == "all"){
             return todos;
@@ -50,8 +40,7 @@ export default function TodoList(){
     }
 
     const showTodos=filterTodos().map((todo)=>{
-        console.log(`id:${todo.title} isCompleted: ${todo.isCompleted}`);
-        return <Todo key={todo.id} todo={todo} handleCheck={handleCheck}></Todo>
+        return <Todo key={todo.id} todo={todo}></Todo>
     });
 
     function handleAddClick(){
@@ -66,6 +55,7 @@ export default function TodoList(){
             isCompleted:false,
         }
         setTodos([...todos,newTodo]);
+        localStorage.setItem("todos",JSON.stringify([...todos,newTodo]));
         setTitleInput("");
     }
     
