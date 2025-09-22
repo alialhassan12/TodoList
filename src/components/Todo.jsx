@@ -38,6 +38,7 @@ export default function Todo({todo}){
             return t;
         });
         setTodos(updatedTodo);
+        localStorage.setItem("todos",JSON.stringify(updatedTodo));
     }
 
     function handleDelete(){
@@ -45,6 +46,7 @@ export default function Todo({todo}){
             return t.id !=todo.id;
         });
         setTodos(updatedTodo);
+        localStorage.setItem("todos",JSON.stringify(updatedTodo));
     }
 
     function handleEdit(){
@@ -56,6 +58,7 @@ export default function Todo({todo}){
             }
         });
         setTodos(updateTodo);
+        localStorage.setItem("todos",JSON.stringify(updateTodo));
     }
 
     function handleDeleteDialogClose(){
@@ -71,7 +74,7 @@ export default function Todo({todo}){
                 <CardContent >
                     <Grid container spacing={2}  display="flex" justifyContent="center" alignItems="center">
                         <Grid size={8} >
-                            <Typography variant='h5' sx={{textAlign:"start",fontWeight:"bold"}}>
+                            <Typography variant='h5' sx={{textAlign:"start",fontWeight:"bold",textDecoration:todo.isCompleted?"line-through":"none"}}>
                                 {todo.title}
                             </Typography>
                             <Typography variant='h6' sx={{textAlign:"start",fontWeight:"100"}}>

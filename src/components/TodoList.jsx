@@ -15,17 +15,27 @@ import Todo from './Todo';
 import { TodosContext } from '../contexts/TodosContext';
 //hooks
 import { useState,useContext,useEffect } from 'react';
+//Dialog imports
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogContentText from '@mui/material/DialogContentText';
+import DialogTitle from '@mui/material/DialogTitle';
 //others
 import { v4 as uuidv4 } from 'uuid';
 
 
 export default function TodoList(){
     const {todos,setTodos}=useContext(TodosContext);
-    const [titleInput,setTitleInput]=useState("");
+    const [input,setInput]=useState({
+        title:"",
+        details:""
+    });
+    const [showAddDialog,setShowAddDialog]=useState(false);
     const[filter,setFilter]=useState("all");
     
     useEffect(()=>{
-        const storageTodos=JSON.parse(localStorage.getItem("todos"));
+        const storageTodos=JSON.parse(localStorage.getItem("todos")) ?? [];
         setTodos(storageTodos);
     },[]);
     
@@ -44,24 +54,28 @@ export default function TodoList(){
     });
 
     function handleAddClick(){
-        if(titleInput == ""){
+        if(input.title == ""){
             alert("title cant be empty");
             return;
         }
         const newTodo={
             id:uuidv4(),
-            title:titleInput,
-            details:"",
+            title:input.title,
+            details:input.details,
             isCompleted:false,
         }
         setTodos([...todos,newTodo]);
         localStorage.setItem("todos",JSON.stringify([...todos,newTodo]));
-        setTitleInput("");
+        setInput({title:"",details:""});
     }
-    
+
+    function handleAddDialogClose(){
+        setShowAddDialog(false);
+    }
+
     return (
         <Container maxWidth="sm" >
-            <Card sx={{ minWidth: 275 }}>
+            <Card sx={{ minWidth: 275,maxHeight:"80vh",overflowY:"scroll"}}>
                 <CardContent>
                     <Typography variant='h2'>
                         To-Do
@@ -70,12 +84,14 @@ export default function TodoList(){
 
                     {/* Filter buttons group */}
                     <ToggleButtonGroup
-                        onChange={(e,filterValue)=>{
-                            setFilter(filterValue);
+                        value={filter}
+                        onChange={(e)=>{
+                            setFilter(e.target.value);
                         }}
                         style={{marginTop:"30px"}}
                         exclusive
                         aria-label="text alignment"
+                        color="primary"
                     >
                         <ToggleButton value="all">
                             All
@@ -96,25 +112,83 @@ export default function TodoList(){
                     <Grid container spacing={2} style={{marginTop:"20px"}}>
                         <Grid size={8}>
                             <TextField
-                                value={titleInput}
+                                value={input.title}
                                 style={{width:"100%"}} 
                                 id="outlined-basic" 
                                 label="add Todo" 
                                 variant="outlined"
-                                onChange={(e)=>setTitleInput(e.target.value)}
+                                onChange={(e)=>setInput({...input,title:e.target.value})}
                                 />
                         </Grid>
                         <Grid size={4}>
                             <Button
-                                onClick={()=>handleAddClick()}
+                                onClick={()=>{
+                                    setShowAddDialog(true);
+                                }}
                                 style={{width:"100%",height:"100%"}}
-                                variant="contained">Add</Button>
+                                variant="contained"
+                                disabled={input.title.length == 0}
+                                >Add
+                            </Button>
+                            
                         </Grid>
                     </Grid>
                     {/* ==========INPUT + ADD BUTTON======= */}
 
                 </CardContent>
             </Card>
+             {/* Add Dialog */}
+        <Dialog
+            open={showAddDialog}
+            onClose={handleAddDialogClose}
+            aria-labelledby="alert-dialog-title"
+            aria-describedby="alert-dialog-description"
+        >
+            <DialogTitle id="alert-dialog-title">
+                {"Add Todo "}
+            </DialogTitle>
+            <DialogContent>
+            <TextField
+                autoFocus
+                required
+                margin="dense"
+                id="name"
+                name="email"
+                label="Title"
+                fullWidth
+                variant="standard"
+                value={input.title}
+                onChange={(e)=>{
+                    setInput({...input,title:e.target.value});
+                }}
+            />
+            <TextField
+                autoFocus
+                required
+                margin="dense"
+                id="name"
+                name="email"
+                label="Details"
+                fullWidth
+                variant="standard"
+                value={input.details}
+                onChange={(e)=>{
+                    setInput({...input,details:e.target.value});
+                }}
+            />
+            </DialogContent>
+            <DialogActions>
+            <Button onClick={handleAddDialogClose}>Dismiss</Button>
+            <Button onClick={()=>{
+                handleAddClick();
+                handleAddDialogClose();
+            }} >
+                Add
+            </Button>
+            </DialogActions>
+        </Dialog>
+        {/* ===== Add Dialog ==== */}
         </Container>
+        
     );
 }
