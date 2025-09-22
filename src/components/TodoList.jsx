@@ -14,7 +14,7 @@ import TextField from '@mui/material/TextField';
 import Todo from './Todo';
 import { TodosContext } from '../contexts/TodosContext';
 //hooks
-import { useState,useContext,useEffect } from 'react';
+import { useState,useContext,useEffect,useMemo } from 'react';
 //Dialog imports
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
@@ -39,17 +39,30 @@ export default function TodoList(){
         setTodos(storageTodos);
     },[]);
     
-    const filterTodos=()=>{
-        if(filter == "all"){
-            return todos;
-        }else if(filter == "done"){
-            return todos.filter(f=>f.isCompleted==true);
-        }else if(filter == "progress"){
-            return todos.filter(f=>f.isCompleted==false);
-        }
-    }
+    const completedTodos=useMemo(()=>{
+        console.log("completed");
+        return todos.filter((t)=>{
+            return t.isCompleted;
+        });
+    },[todos]);
+    const notCompleted=useMemo(()=>{
+        console.log("not completed");
+        return todos.filter((t)=>{
+            return !t.isCompleted;
+        })
+    },[todos]);
 
-    const showTodos=filterTodos().map((todo)=>{
+    let todoToBeRendered=()=>{
+        if(filter == "done"){
+            return completedTodos;
+        }else if(filter == "progress"){
+            return notCompleted
+        }else{
+            return todos;
+        }
+    };
+    
+    const showTodos=todoToBeRendered().map((todo)=>{
         return <Todo key={todo.id} todo={todo}></Todo>
     });
 
