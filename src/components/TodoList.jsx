@@ -31,7 +31,14 @@ export default function TodoList(){
         title:"",
         details:""
     });
+    const [todoDialog,setTodoDialog]=useState(null);
     const [showAddDialog,setShowAddDialog]=useState(false);
+    const [showDeleteDialog,setShowDeleteDialog]=useState(false);
+    const [showUpdateDialog,setShowUpdateDialog]=useState(false);
+    const [edit,setEdit]=useState({
+        title:"",
+        details:"",
+    });
     const[filter,setFilter]=useState("all");
     
     useEffect(()=>{
@@ -40,13 +47,11 @@ export default function TodoList(){
     },[]);
     
     const completedTodos=useMemo(()=>{
-        console.log("completed");
         return todos.filter((t)=>{
             return t.isCompleted;
         });
     },[todos]);
     const notCompleted=useMemo(()=>{
-        console.log("not completed");
         return todos.filter((t)=>{
             return !t.isCompleted;
         })
@@ -63,9 +68,10 @@ export default function TodoList(){
     };
     
     const showTodos=todoToBeRendered().map((todo)=>{
-        return <Todo key={todo.id} todo={todo}></Todo>
+        return <Todo key={todo.id} todo={todo} showDeleteDialog={openDeleteDialog} showUpdateDialog={openUpdateDialog}></Todo>
     });
 
+    //Handlers
     function handleAddClick(){
         if(input.title == ""){
             alert("title cant be empty");
@@ -81,127 +87,241 @@ export default function TodoList(){
         localStorage.setItem("todos",JSON.stringify([...todos,newTodo]));
         setInput({title:"",details:""});
     }
-
     function handleAddDialogClose(){
         setShowAddDialog(false);
     }
 
+    function openDeleteDialog(todo){
+        setTodoDialog(todo);
+        setShowDeleteDialog(true);
+    }
+    function handleDeleteDialogClose(){
+        setShowDeleteDialog(false);
+    }
+    function handleDelete(){
+        console.log(todoDialog);
+        const updatedTodo=todos.filter((t)=>{
+            return t.id !=todoDialog.id;
+        });
+        setTodos(updatedTodo);
+        localStorage.setItem("todos",JSON.stringify(updatedTodo));
+    }
+
+    function handleEdit(){
+        const updateTodo=todos.map((t)=>{
+            if(t.id == todoDialog.id){
+                return {...t,title:edit.title,details:edit.details}
+            }else{
+                return t;
+            }
+        });
+        setTodos(updateTodo);
+        localStorage.setItem("todos",JSON.stringify(updateTodo));
+    }
+    function handleUpdateDialogClose(){
+        setShowUpdateDialog(false);
+    }
+    function openUpdateDialog(todo){
+        setTodoDialog(todo);
+        setShowUpdateDialog(true);
+    }
     return (
-        <Container maxWidth="sm" >
-            <Card sx={{ minWidth: 275,maxHeight:"80vh",overflowY:"scroll"}}>
-                <CardContent>
-                    <Typography variant='h2'>
-                        To-Do
-                    </Typography>
-                    <Divider/>
+        <>
+            <Container maxWidth="sm" >
+                <Card sx={{ minWidth: 275,maxHeight:"80vh",overflowY:"scroll"}}>
+                    <CardContent>
+                        <Typography variant='h2'>
+                            To-Do
+                        </Typography>
+                        <Divider/>
 
-                    {/* Filter buttons group */}
-                    <ToggleButtonGroup
-                        value={filter}
-                        onChange={(e)=>{
-                            setFilter(e.target.value);
-                        }}
-                        style={{marginTop:"30px"}}
-                        exclusive
-                        aria-label="text alignment"
-                        color="primary"
-                    >
-                        <ToggleButton value="all">
-                            All
-                        </ToggleButton>
-                        <ToggleButton value="done">
-                            Done
-                        </ToggleButton>
-                        <ToggleButton value="progress">
-                            In Progress
-                        </ToggleButton>
-                    </ToggleButtonGroup>
-                    {/* =====Filter buttons group==== */}
-                    {showTodos}
-                    {/* todos */}
-                    {/* =======todos====== */}
+                        {/* Filter buttons group */}
+                        <ToggleButtonGroup
+                            value={filter}
+                            onChange={(e)=>{
+                                setFilter(e.target.value);
+                            }}
+                            style={{marginTop:"30px"}}
+                            exclusive
+                            aria-label="text alignment"
+                            color="primary"
+                        >
+                            <ToggleButton value="all">
+                                All
+                            </ToggleButton>
+                            <ToggleButton value="done">
+                                Done
+                            </ToggleButton>
+                            <ToggleButton value="progress">
+                                In Progress
+                            </ToggleButton>
+                        </ToggleButtonGroup>
+                        {/* =====Filter buttons group==== */}
+                        {showTodos}
+                        {/* todos */}
+                        {/* =======todos====== */}
 
-                    {/* INPUT + ADD BUTTON */}
-                    <Grid container spacing={2} style={{marginTop:"20px"}}>
-                        <Grid size={8}>
-                            <TextField
-                                value={input.title}
-                                style={{width:"100%"}} 
-                                id="outlined-basic" 
-                                label="add Todo" 
-                                variant="outlined"
-                                onChange={(e)=>setInput({...input,title:e.target.value})}
-                                />
+                        {/* INPUT + ADD BUTTON */}
+                        <Grid container spacing={2} style={{marginTop:"20px"}}>
+                            <Grid size={8}>
+                                <TextField
+                                    value={input.title}
+                                    style={{width:"100%"}} 
+                                    id="outlined-basic" 
+                                    label="add Todo" 
+                                    variant="outlined"
+                                    onChange={(e)=>setInput({...input,title:e.target.value})}
+                                    />
+                            </Grid>
+                            <Grid size={4}>
+                                <Button
+                                    onClick={()=>{
+                                        setShowAddDialog(true);
+                                    }}
+                                    style={{width:"100%",height:"100%"}}
+                                    variant="contained"
+                                    disabled={input.title.length == 0}
+                                    >Add
+                                </Button>
+                                
+                            </Grid>
                         </Grid>
-                        <Grid size={4}>
-                            <Button
-                                onClick={()=>{
-                                    setShowAddDialog(true);
-                                }}
-                                style={{width:"100%",height:"100%"}}
-                                variant="contained"
-                                disabled={input.title.length == 0}
-                                >Add
-                            </Button>
-                            
-                        </Grid>
-                    </Grid>
-                    {/* ==========INPUT + ADD BUTTON======= */}
+                        {/* ==========INPUT + ADD BUTTON======= */}
 
-                </CardContent>
-            </Card>
-             {/* Add Dialog */}
+                    </CardContent>
+                </Card>
+                {/* Add Dialog */}
+            <Dialog
+                open={showAddDialog}
+                onClose={handleAddDialogClose}
+                aria-labelledby="alert-dialog-title"
+                aria-describedby="alert-dialog-description"
+            >
+                <DialogTitle id="alert-dialog-title">
+                    {"Add Todo "}
+                </DialogTitle>
+                <DialogContent>
+                <TextField
+                    autoFocus
+                    required
+                    margin="dense"
+                    id="name"
+                    name="email"
+                    label="Title"
+                    fullWidth
+                    variant="standard"
+                    value={input.title}
+                    onChange={(e)=>{
+                        setInput({...input,title:e.target.value});
+                    }}
+                />
+                <TextField
+                    autoFocus
+                    required
+                    margin="dense"
+                    id="name"
+                    name="email"
+                    label="Details"
+                    fullWidth
+                    variant="standard"
+                    value={input.details}
+                    onChange={(e)=>{
+                        setInput({...input,details:e.target.value});
+                    }}
+                />
+                </DialogContent>
+                <DialogActions>
+                <Button onClick={handleAddDialogClose}>Dismiss</Button>
+                <Button onClick={()=>{
+                    handleAddClick();
+                    handleAddDialogClose();
+                }} >
+                    Add
+                </Button>
+                </DialogActions>
+            </Dialog>
+            {/* ===== Add Dialog ==== */}
+            </Container>
+
+            {/* Delete Dialog */}
+            <Dialog
+                open={showDeleteDialog}
+                onClose={handleDeleteDialogClose}
+                aria-labelledby="alert-dialog-title"
+                aria-describedby="alert-dialog-description"
+            >
+                <DialogTitle id="alert-dialog-title">
+                    {"Are you sure you want delete this Todo?"}
+                </DialogTitle>
+                <DialogContent>
+                <DialogContentText id="alert-dialog-description">
+                    
+                </DialogContentText>
+                </DialogContent>
+                <DialogActions>
+                <Button onClick={handleDeleteDialogClose}>Disagree</Button>
+                <Button onClick={()=>{
+                    handleDelete();
+                    handleDeleteDialogClose();
+                }} >
+                    Agree
+                </Button>
+                </DialogActions>
+            </Dialog>
+            {/* ===== Delete Dialog ==== */}
+
+                    {/* Update Dialog */}
         <Dialog
-            open={showAddDialog}
-            onClose={handleAddDialogClose}
+            open={showUpdateDialog}
+            onClose={handleUpdateDialogClose}
             aria-labelledby="alert-dialog-title"
             aria-describedby="alert-dialog-description"
         >
             <DialogTitle id="alert-dialog-title">
-                {"Add Todo "}
+                {"Edit Todo"}
             </DialogTitle>
             <DialogContent>
-            <TextField
-                autoFocus
-                required
-                margin="dense"
-                id="name"
-                name="email"
-                label="Title"
-                fullWidth
-                variant="standard"
-                value={input.title}
-                onChange={(e)=>{
-                    setInput({...input,title:e.target.value});
-                }}
-            />
-            <TextField
-                autoFocus
-                required
-                margin="dense"
-                id="name"
-                name="email"
-                label="Details"
-                fullWidth
-                variant="standard"
-                value={input.details}
-                onChange={(e)=>{
-                    setInput({...input,details:e.target.value});
-                }}
-            />
+                <TextField
+                    autoFocus
+                    required
+                    margin="dense"
+                    id="name"
+                    name="email"
+                    label="Title"
+                    fullWidth
+                    variant="standard"
+                    value={edit.title}
+                    onChange={(e)=>{
+                        setEdit({...edit,title:e.target.value});
+                    }}
+                />
+                <TextField
+                    autoFocus
+                    required
+                    margin="dense"
+                    id="name"
+                    name="email"
+                    label="Details"
+                    fullWidth
+                    variant="standard"
+                    value={edit.details}
+                    onChange={(e)=>{
+                        setEdit({...edit,details:e.target.value});
+                    }}
+                />
             </DialogContent>
             <DialogActions>
-            <Button onClick={handleAddDialogClose}>Dismiss</Button>
+            <Button onClick={handleUpdateDialogClose}>Ignore</Button>
             <Button onClick={()=>{
-                handleAddClick();
-                handleAddDialogClose();
+                handleEdit();
+                handleUpdateDialogClose();
             }} >
-                Add
+                Edit
             </Button>
             </DialogActions>
         </Dialog>
-        {/* ===== Add Dialog ==== */}
-        </Container>
+        {/* ===== Update Dialog ==== */}
+        </>
         
     );
 }
