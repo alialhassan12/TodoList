@@ -35,10 +35,6 @@ export default function Todo({todo,showDeleteDialog,showUpdateDialog}){
         localStorage.setItem("todos",JSON.stringify(updatedTodo));
     }
 
-    
-
-    
-
     return(
         <>
             <Card className='todoCard' sx={{ minWidth: 275,background:"#283593",marginTop:"30px" }} >
